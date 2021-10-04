@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"path"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -53,8 +54,12 @@ type CertificateAuthoritySpec struct {
 	LabelValue string `hcl:"label_value"`
 }
 
-func (spec *CertificateAuthoritySpec) caParentPath() string {
-	return path.Join("projects", spec.Project, "locations", spec.Location, "caPools", spec.CaPool)
+func (spec *CertificateAuthoritySpec) caParentPath(caPool string) string {
+	return path.Join(spec.caPoolParentPath(), "caPools", caPool)
+}
+
+func (spec *CertificateAuthoritySpec) caPoolParentPath() string {
+	return path.Join("projects", spec.Project, "locations", spec.Location)
 }
 
 type Configuration struct {
@@ -129,7 +134,6 @@ func (p *Plugin) PublishJWTKeyAndSubscribe(*upstreamauthorityv1.PublishJWTKeyReq
 }
 
 func (p *Plugin) Configure(ctx context.Context, req *configv1.ConfigureRequest) (*configv1.ConfigureResponse, error) {
-	p.log.Warn("This plugin relies on GCP Certificate Authority Service which is currently in Beta")
 	// Parse HCL config payload into config struct
 	config := new(Configuration)
 	if err := hcl.Decode(config, req.HclConfiguration); err != nil {
@@ -142,9 +146,6 @@ func (p *Plugin) Configure(ctx context.Context, req *configv1.ConfigureRequest) 
 	if config.RootSpec.Location == "" {
 		return nil, status.Error(codes.InvalidArgument, "configuration has empty root_cert_spec.Location property")
 	}
-	if config.RootSpec.CaPool == "" {
-		return nil, status.Error(codes.InvalidArgument, "configuration has empty root_cert_spec.CaPool property")
-	}
 	// Even LabelKey/Value pair is necessary
 	if config.RootSpec.LabelKey == "" {
 		return nil, status.Error(codes.InvalidArgument, "configuration has empty root_cert_spec.LabelKey property")
@@ -152,7 +153,9 @@ func (p *Plugin) Configure(ctx context.Context, req *configv1.ConfigureRequest) 
 	if config.RootSpec.LabelValue == "" {
 		return nil, status.Error(codes.InvalidArgument, "configuration has empty root_cert_spec.LabelValue property")
 	}
-
+	if config.RootSpec.CaPool == "" {
+		p.log.Warn("The ca_pool value is not configured. Falling back to searching the region for matching CAs. The ca_pool configurable will be required in a future release.")
+	}
 	// Swap out the current configuration with the new configuration
 	p.setConfig(config)
 
@@ -248,15 +251,18 @@ func (p *Plugin) mintX509CA(ctx context.Context, csr []byte, preferredTTL int32)
 	san.Uris = uris
 
 	isCa := true
-	// this is 0, golint complains if it's explicittly set to 0 since it's the default value of an int32
+	// this is 0, golint complains if it's explicitly set to 0 since it's the default value of an int32
 	var maxIssuerPathLength int32
 
 	// privatecapb.CertificateAuthority.Name is the full GCP path but the request below expects only the CA's ID
-	_, issuingCaID := path.Split(parentPath)
+	chosenPool, issuingCaID := path.Split(parentPath)
+	// chosenPool will be in the form of projects/PROJECT/locations/LOCATION/caPools/POOL/certificateAuthorities/
+	// after the path.Split call above.  We need to trim off the /certificateAuthorities/ part for the request below
+	chosenPool = strings.TrimSuffix(chosenPool, "/certificateAuthorities/")
 
 	// https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1#CertificateAuthorityClient.CreateCertificate
 	createRequest := privatecapb.CreateCertificateRequest{
-		Parent:                        p.c.RootSpec.caParentPath(),
+		Parent:                        chosenPool,
 		IssuingCertificateAuthorityId: issuingCaID,
 		// https://pkg.go.dev/google.golang.org/genproto/googleapis/cloud/security/privateca/v1#Certificate
 		Certificate: &privatecapb.Certificate{
@@ -383,32 +389,81 @@ type gcpCAClient struct {
 func (client *gcpCAClient) CreateCertificate(ctx context.Context, req *privatecapb.CreateCertificateRequest) (*privatecapb.Certificate, error) {
 	return client.pcaClient.CreateCertificate(ctx, req)
 }
+
 func (client *gcpCAClient) LoadCertificateAuthorities(ctx context.Context, spec CertificateAuthoritySpec) ([]*privatecapb.CertificateAuthority, error) {
+	var poolsToSearch []string
+	var err error
+	// if the config has a ca pool provided only look for CAs in that pool, otherwise search each pool in the region
+	if spec.CaPool == "" {
+		poolsToSearch, err = client.listCaPools(ctx, spec)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		poolsToSearch = []string{spec.caParentPath(spec.CaPool)}
+	}
+
 	// https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1#CertificateAuthorityClient.ListCertificateAuthorities
 	var allCerts []*privatecapb.CertificateAuthority
-	certIt := client.pcaClient.ListCertificateAuthorities(ctx, &privatecapb.ListCertificateAuthoritiesRequest{
-		Parent: spec.caParentPath(),
-		Filter: fmt.Sprintf("labels.%s:%s", spec.LabelKey, spec.LabelValue),
-		// There is "OrderBy" option but it seems to work only for the name field
-		// So we will have to sort it by expiry timestamp at our end
+	// if there are cas in multiple pools that match our filter we need to throw an error
+	selectedPool := ""
+	for _, pool := range poolsToSearch {
+		certIt := client.pcaClient.ListCertificateAuthorities(ctx, &privatecapb.ListCertificateAuthoritiesRequest{
+			Parent: pool,
+			Filter: fmt.Sprintf("labels.%s:%s", spec.LabelKey, spec.LabelValue),
+			// There is "OrderBy" option but it seems to work only for the name field
+			// So we will have to sort it by expiry timestamp at our end
+		})
+
+		p := iterator.NewPager(certIt, 20, "")
+		for {
+			var page []*privatecapb.CertificateAuthority
+
+			nextPageToken, err := p.NextPage(&page)
+			if err != nil {
+				return nil, err
+			}
+
+			if selectedPool == "" && len(page) > 0 {
+				selectedPool = pool
+			} else if selectedPool != "" && pool != selectedPool && len(page) > 0 {
+				return nil, fmt.Errorf("CAs with matching labels found across multiple CA Pools. Either specify a CA Pool to use in the plugin configuration or ensure CA labels are unique to a single CA Pool.")
+			}
+
+			allCerts = append(allCerts, page...)
+			if nextPageToken == "" {
+				break
+			}
+		}
+	}
+
+	return allCerts, nil
+}
+
+func (client *gcpCAClient) listCaPools(ctx context.Context, spec CertificateAuthoritySpec) ([]string, error) {
+	var poolsToSearch []string
+	poolIt := client.pcaClient.ListCaPools(ctx, &privatecapb.ListCaPoolsRequest{
+		Parent: spec.caPoolParentPath(),
 	})
 
-	p := iterator.NewPager(certIt, 20, "")
+	p := iterator.NewPager(poolIt, 20, "")
 	for {
-		var page []*privatecapb.CertificateAuthority
-
+		var page []*privatecapb.CaPool
 		nextPageToken, err := p.NextPage(&page)
 		if err != nil {
 			return nil, err
 		}
 
-		allCerts = append(allCerts, page...)
+		for _, pool := range page {
+			poolsToSearch = append(poolsToSearch, pool.Name)
+		}
+
 		if nextPageToken == "" {
 			break
 		}
 	}
 
-	return allCerts, nil
+	return poolsToSearch, nil
 }
 
 func filterOutNonEnabledCAs(cas []*privatecapb.CertificateAuthority) []*privatecapb.CertificateAuthority {

@@ -85,21 +85,6 @@ func TestInvalidConfigs(t *testing.T) {
 			label_key = "proj-signer"
 			label_value = ""
 		    }`,
-		// Missing ca pool value
-		`root_cert_spec {
-			project_name = "proj1"
-			region_name = "us-central1"
-			label_key = "proj-signer"
-			label_value = "true"
-		    }`,
-		// Empty ca pool value
-		`root_cert_spec {
-			project_name = "proj1"
-			region_name = "us-central1"
-			ca_pool = ""
-			label_key = "proj-signer"
-			label_value = "true"
-		    }`,
 	} {
 		var err error
 		plugintest.Load(t, BuiltIn(), new(upstreamauthority.V1),
