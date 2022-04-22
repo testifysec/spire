@@ -225,35 +225,13 @@ go_ldflags := '${go_ldflags}'
 # Build Targets
 #############################################################################
 
-.PHONY: build-witness-ci
-
-build-witness-ci: tidy bin/spire-server bin/spire-agent bin/k8s-workload-registrar bin/oidc-discovery-provider
-
-define binary_rule-ci
-.PHONY: $1
-$1: | go-check bin/
-	@echo Building $1...
-	witness run -s build -c ./witness/.witness-ci.yaml -o /dev/null -- bash -c "go build $$(go_flags) -ldflags $$(go_ldflags) -o $1$(exe) $2"
-endef
-
-# main SPIRE binaries
-$(eval $(call binary_rule-ci,bin/spire-server,./cmd/spire-server))
-$(eval $(call binary_rule-ci,bin/spire-agent,./cmd/spire-agent))
-$(eval $(call binary_rule-ci,bin/k8s-workload-registrar,./support/k8s/k8s-workload-registrar))
-$(eval $(call binary_rule-ci,bin/oidc-discovery-provider,./support/oidc-discovery-provider))
-
-bin/:
-	@mkdir -p $@
-
-######
-
 build-witness: tidy bin/spire-server bin/spire-agent bin/k8s-workload-registrar bin/oidc-discovery-provider
 
 define binary_rule
 .PHONY: $1
 $1: | go-check bin/
 	@echo Building $1...
-	witness run -s build -c .witness.yaml -o /dev/null -- bash -c "go build $$(go_flags) -ldflags $$(go_ldflags) -o $1$(exe) $2"
+	witness run -s build -c witness/.witness-ci.yaml -o /dev/null -- bash -c "go build $$(go_flags) -ldflags $$(go_ldflags) -o $1$(exe) $2"
 endef
 
 # main SPIRE binaries
