@@ -10,10 +10,10 @@ variables:
 clone:
   stage: clone
   script:
-    - witness run -s clone -a gitlab -a gcp-iit --spiffe-socket=unix:///run/spire/sockets/agent.sock -r https://log.testifysec.io -- bash -c \
+    - witness run -s clone -a gitlab -a gcp-iit --spiffe-socket=unix:///run/spire/sockets/agent.sock -r https://log.testifysec.io -o /dev/null -- bash -c \
       "git clone ${CI_REPOSITORY_URL} . && git reset --hard ${CI_COMMIT_SHA}"
     - git rev-parse --verify HEAD > commithash
-    - witness -c .witness-ci.yaml verify -p ./policy/ci-gate-policy.signed.json -f commithash
+    - witness -c ./witness/.witness-ci.yaml verify -p ./policy/ci-gate-policy.signed.json -f commithash
   artifacts:
     exclude:
       - commithash
