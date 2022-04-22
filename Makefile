@@ -229,7 +229,7 @@ go_ldflags := '${go_ldflags}'
 
 build-witness-ci: tidy bin/spire-server bin/spire-agent bin/k8s-workload-registrar bin/oidc-discovery-provider
 
-define binary_rule
+define binary_rule-ci
 .PHONY: $1
 $1: | go-check bin/
 	@echo Building $1...
@@ -237,10 +237,10 @@ $1: | go-check bin/
 endef
 
 # main SPIRE binaries
-$(eval $(call binary_rule,bin/spire-server,./cmd/spire-server))
-$(eval $(call binary_rule,bin/spire-agent,./cmd/spire-agent))
-$(eval $(call binary_rule,bin/k8s-workload-registrar,./support/k8s/k8s-workload-registrar))
-$(eval $(call binary_rule,bin/oidc-discovery-provider,./support/oidc-discovery-provider))
+$(eval $(call binary_rule-ci,bin/spire-server,./cmd/spire-server))
+$(eval $(call binary_rule-ci,bin/spire-agent,./cmd/spire-agent))
+$(eval $(call binary_rule-ci,bin/k8s-workload-registrar,./support/k8s/k8s-workload-registrar))
+$(eval $(call binary_rule-ci,bin/oidc-discovery-provider,./support/oidc-discovery-provider))
 
 bin/:
 	@mkdir -p $@
