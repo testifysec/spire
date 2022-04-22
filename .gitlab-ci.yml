@@ -33,6 +33,7 @@ build:
       - ./bin/*
       - ./witness/.witness-ci.yaml
       - ./witness/ci-gate-policy.signed.json
+      - ./witness/testpub.pem
 verify:
   dependencies:
     - "build"
