@@ -5,7 +5,6 @@ stages:
   - build
   - verify
 
-
 variables:
   GIT_STRATEGY: none
 clone:
