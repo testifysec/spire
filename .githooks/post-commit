@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+
+
+witness run -s commit -a git --fulcio=https://v1.fulcio.sigstore.dev --fulcio-oidc-client-id=https://oauth2.sigstore.dev/auth --fulcio-oidc-issuer=sigstore --rekor-server=https://log.testifysec.io -- git rev-parse --verify HEAD > commithash
+rm commithash

@@ -1,0 +1,24 @@
+expires: "2023-12-17T23:57:40-05:00"
+steps:
+  commit:
+    name: commit
+    attestations:
+      - type: https://witness.dev/attestations/product/v0.1
+    functionaries:
+      - type: root
+        certConstraint:
+          commonname: "*"
+          dnsnames:
+            - "*"
+          emails:
+            - "cole@testifysec.com"
+          organizations:
+            - "*"
+          uris:
+            - "*"
+          roots:
+            - "{{FULCIO_ROOT_ID}}"
+roots:
+  "{{FULCIO_ROOT_ID}}":
+    certificate: |
+      "{{FULCIO_ROOT_CERT}}"

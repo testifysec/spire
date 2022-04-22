@@ -1,0 +1,62 @@
+registry.gitlab.com/testifysec/spire/builder:v0.0.1
+
+stages:
+  - clone
+  - deps
+  - build
+  - package
+  - verify
+
+
+variables:
+  GIT_STRATEGY: none
+clone:
+  stage: clone
+  script:
+    - witness run -s clone -a gitlab -a gcp-iit --spiffe-socket=unix:///run/spire/sockets/agent.sock -r https://log.testifysec.io -- bash -c \
+      "git clone ${CI_REPOSITORY_URL} . && git reset --hard ${CI_COMMIT_SHA}"
+    - git rev-parse --verify HEAD > commithash
+    - witness -c .witness-ci.yaml verify -p ./policy/ci-gate-policy.signed.json -f commithash
+  artifacts:
+    exclude:
+      - commithash
+    paths:
+      - ./*
+deps:
+  dependencies:
+    - "clone"
+  stage: deps
+  script:
+    - |-
+      witness -c .witness-ci.yaml run -s deps -- /bin/sh -c "npm i"
+  artifacts:
+    exclude:
+      - .git
+    paths:
+      - ./*
+build:
+  dependencies:
+    - "deps"
+  stage: build
+  script:
+    - |-
+      witness -c .witness-ci.yaml run -s build -- /bin/sh -c \
+      "npm run build:prod"
+  artifacts:
+    exclude:
+      - .git
+    paths:
+      - ./*
+package:
+  stage: package
+  script:
+    - |-
+      witness -c .witness-ci.yaml run -s package -- /bin/sh -c \
+      "npx pkg . --compress Brotli -t node16-linux-x64  -o snyk-linux"
+  artifacts:
+    paths:
+      - "snyk-linux"
+verify:
+  stage: verify
+  script:
+    - witness verify -k ./policy/testpub.pem -p ./policy/artifact-policy.signed.json -r https://log.testifysec.io -f 

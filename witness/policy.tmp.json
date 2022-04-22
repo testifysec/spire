@@ -1,0 +1,285 @@
+{
+  "expires": "2022-12-17T23:57:40-05:00",
+  "steps": {
+    "commit": {
+      "name": "commit",
+      "attestations": [
+        {
+          "type": "https://witness.dev/attestations/product/v0.1"
+        }
+      ],
+      "functionaries": [
+        {
+          "type": "root",
+          "certConstraint": {
+            "commonname": "*",
+            "dnsnames": [
+              "*"
+            ],
+            "emails": [
+              "cole@testifysec.com"
+            ],
+            "organizations": [
+              "*"
+            ],
+            "uris": [
+              "*"
+            ],
+            "roots": [
+              "3ba7b6cc4e95469d4d334b49cb257ad8537076fa84b0ca87ff4ecfe6a54680c1"
+            ]
+          }
+        }
+      ]
+    },
+    "clone": {
+      "artifactsFrom": [
+        "commit"
+      ],
+      "name": "clone",
+      "attestations": [
+        {
+          "type": "https://witness.dev/attestations/material/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/product/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/command-run/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/gitlab/v0.1",
+          "regoPolicies": [
+            {
+              "name": "gitlab",
+              "module": "cGFja2FnZSBnaXRsYWJfZGVtbwoKCmRlbnlbbXNnXXsgIAogICAgaW5wdXQuand0LmNsYWltcy5pc3MgIT0gImdpdGxhYi5jb20iCiAgICBtc2cgPSAiaXNzdWVyIGlzIG5vdCBnaXRsYWIuY29tIgp9"
+            }
+          ]
+        },
+        {
+          "type": "https://witness.dev/attestations/gcp-iit/v0.1",
+          "regoPolicies": [
+            {
+              "name": "gcp-iit",
+              "module": "cGFja2FnZSBnY3BfZGVtbwoKZGVueVttc2ddewogICAgaW5wdXQucHJvamVjdF9pZCAhPSAiMzI0MzIyIgogICAgbXNnID0gIlByb2plY3QgSUQgaXMgbm90IGNvcnJlY3QiCgp9CgpkZW55W21zZ117CiAgICBpbnB1dC5jbHVzdGVyX2xvY2F0aW9uICE9ICJ1cy1lYXN0MS1iIgogICAgbXNnID0gIkNsdXN0ZXIgbG9jYXRpb24gaXMgbm90IGNvcnJlY3QiCn0KCmRlbnlbbXNnXXsKICAgIGlucHV0Lmp3dC5jbGFpbXMuaXNzICE9ICJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iCiAgICBtc2cgPSAiSldUIGlzc3VlciBpcyBub3QgY29ycmVjdCIKfQoK"
+            }
+          ]
+        }
+      ],
+      "functionaries": [
+        {
+          "type": "root",
+          "certConstraint": {
+            "commonname": "*",
+            "dnsnames": [
+              "*"
+            ],
+            "emails": [
+              "*"
+            ],
+            "organizations": [
+              "*"
+            ],
+            "uris": [
+              "spiffe://dev.testifysec.com/witness-demo/builder"
+            ],
+            "roots": [
+              "bc528aa5c6af42790e2e1d977bc0b1b7dcd15e2e93ea0d8029a46fc9b73a53a1"
+            ]
+          }
+        }
+      ]
+    },
+    "deps": {
+      "artifactsFrom": [
+        "clone"
+      ],
+      "name": "deps",
+      "attestations": [
+        {
+          "type": "https://witness.dev/attestations/material/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/product/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/command-run/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/git/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/gitlab/v0.1",
+          "regoPolicies": [
+            {
+              "name": "gitlab",
+              "module": "cGFja2FnZSBnaXRsYWJfZGVtbwoKCmRlbnlbbXNnXXsgIAogICAgaW5wdXQuand0LmNsYWltcy5pc3MgIT0gImdpdGxhYi5jb20iCiAgICBtc2cgPSAiaXNzdWVyIGlzIG5vdCBnaXRsYWIuY29tIgp9"
+            }
+          ]
+        },
+        {
+          "type": "https://witness.dev/attestations/gcp-iit/v0.1",
+          "regoPolicies": [
+            {
+              "name": "gcp-iit",
+              "module": "cGFja2FnZSBnY3BfZGVtbwoKZGVueVttc2ddewogICAgaW5wdXQucHJvamVjdF9pZCAhPSAiMzI0MzIyIgogICAgbXNnID0gIlByb2plY3QgSUQgaXMgbm90IGNvcnJlY3QiCgp9CgpkZW55W21zZ117CiAgICBpbnB1dC5jbHVzdGVyX2xvY2F0aW9uICE9ICJ1cy1lYXN0MS1iIgogICAgbXNnID0gIkNsdXN0ZXIgbG9jYXRpb24gaXMgbm90IGNvcnJlY3QiCn0KCmRlbnlbbXNnXXsKICAgIGlucHV0Lmp3dC5jbGFpbXMuaXNzICE9ICJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iCiAgICBtc2cgPSAiSldUIGlzc3VlciBpcyBub3QgY29ycmVjdCIKfQoK"
+            }
+          ]
+        }
+      ],
+      "functionaries": [
+        {
+          "type": "root",
+          "certConstraint": {
+            "commonname": "*",
+            "dnsnames": [
+              "*"
+            ],
+            "emails": [
+              "*"
+            ],
+            "organizations": [
+              "*"
+            ],
+            "uris": [
+              "spiffe://dev.testifysec.com/witness-demo/builder"
+            ],
+            "roots": [
+              "bc528aa5c6af42790e2e1d977bc0b1b7dcd15e2e93ea0d8029a46fc9b73a53a1"
+            ]
+          }
+        }
+      ]
+    },
+    "build": {
+      "artifactsFrom": [
+        "deps"
+      ],
+      "name": "build",
+      "attestations": [
+        {
+          "type": "https://witness.dev/attestations/material/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/product/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/command-run/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/git/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/gitlab/v0.1",
+          "regoPolicies": [
+            {
+              "name": "gitlab",
+              "module": "cGFja2FnZSBnaXRsYWJfZGVtbwoKCmRlbnlbbXNnXXsgIAogICAgaW5wdXQuand0LmNsYWltcy5pc3MgIT0gImdpdGxhYi5jb20iCiAgICBtc2cgPSAiaXNzdWVyIGlzIG5vdCBnaXRsYWIuY29tIgp9"
+            }
+          ]
+        },
+        {
+          "type": "https://witness.dev/attestations/gcp-iit/v0.1",
+          "regoPolicies": [
+            {
+              "name": "gcp-iit",
+              "module": "cGFja2FnZSBnY3BfZGVtbwoKZGVueVttc2ddewogICAgaW5wdXQucHJvamVjdF9pZCAhPSAiMzI0MzIyIgogICAgbXNnID0gIlByb2plY3QgSUQgaXMgbm90IGNvcnJlY3QiCgp9CgpkZW55W21zZ117CiAgICBpbnB1dC5jbHVzdGVyX2xvY2F0aW9uICE9ICJ1cy1lYXN0MS1iIgogICAgbXNnID0gIkNsdXN0ZXIgbG9jYXRpb24gaXMgbm90IGNvcnJlY3QiCn0KCmRlbnlbbXNnXXsKICAgIGlucHV0Lmp3dC5jbGFpbXMuaXNzICE9ICJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iCiAgICBtc2cgPSAiSldUIGlzc3VlciBpcyBub3QgY29ycmVjdCIKfQoK"
+            }
+          ]
+        }
+      ],
+      "functionaries": [
+        {
+          "type": "root",
+          "certConstraint": {
+            "commonname": "*",
+            "dnsnames": [
+              "*"
+            ],
+            "emails": [
+              "*"
+            ],
+            "organizations": [
+              "*"
+            ],
+            "uris": [
+              "spiffe://dev.testifysec.com/witness-demo/builder"
+            ],
+            "roots": [
+              "bc528aa5c6af42790e2e1d977bc0b1b7dcd15e2e93ea0d8029a46fc9b73a53a1"
+            ]
+          }
+        }
+      ]
+    },
+    "package": {
+      "artifactsFrom": [
+        "build"
+      ],
+      "name": "package",
+      "attestations": [
+        {
+          "type": "https://witness.dev/attestations/material/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/product/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/command-run/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/git/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/gitlab/v0.1",
+          "regoPolicies": [
+            {
+              "name": "gitlab",
+              "module": "cGFja2FnZSBnaXRsYWJfZGVtbwoKCmRlbnlbbXNnXXsgIAogICAgaW5wdXQuand0LmNsYWltcy5pc3MgIT0gImdpdGxhYi5jb20iCiAgICBtc2cgPSAiaXNzdWVyIGlzIG5vdCBnaXRsYWIuY29tIgp9"
+            }
+          ]
+        },
+        {
+          "type": "https://witness.dev/attestations/gcp-iit/v0.1",
+          "regoPolicies": [
+            {
+              "name": "gcp-iit",
+              "module": "cGFja2FnZSBnY3BfZGVtbwoKZGVueVttc2ddewogICAgaW5wdXQucHJvamVjdF9pZCAhPSAiMzI0MzIyIgogICAgbXNnID0gIlByb2plY3QgSUQgaXMgbm90IGNvcnJlY3QiCgp9CgpkZW55W21zZ117CiAgICBpbnB1dC5jbHVzdGVyX2xvY2F0aW9uICE9ICJ1cy1lYXN0MS1iIgogICAgbXNnID0gIkNsdXN0ZXIgbG9jYXRpb24gaXMgbm90IGNvcnJlY3QiCn0KCmRlbnlbbXNnXXsKICAgIGlucHV0Lmp3dC5jbGFpbXMuaXNzICE9ICJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iCiAgICBtc2cgPSAiSldUIGlzc3VlciBpcyBub3QgY29ycmVjdCIKfQoK"
+            }
+          ]
+        }
+      ],
+      "functionaries": [
+        {
+          "type": "root",
+          "certConstraint": {
+            "commonname": "*",
+            "dnsnames": [
+              "*"
+            ],
+            "emails": [
+              "*"
+            ],
+            "organizations": [
+              "*"
+            ],
+            "uris": [
+              "spiffe://dev.testifysec.com/witness-demo/builder"
+            ],
+            "roots": [
+              "bc528aa5c6af42790e2e1d977bc0b1b7dcd15e2e93ea0d8029a46fc9b73a53a1"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "roots": {
+    "bc528aa5c6af42790e2e1d977bc0b1b7dcd15e2e93ea0d8029a46fc9b73a53a1": {
+      "certificate": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURWVENDQWoyZ0F3SUJBZ0lVQU13V3ZzSnVn\nbUFnWW4vRDEzSk1zM3YrZEdFd0RRWUpLb1pJaHZjTkFRRUwKQlFBd01qRVRNQkVHQTFVRUNoTUtW\nR1Z6ZEdsbWVWTmxZekViTUJrR0ExVUVBeE1TWkdWMkxuUmxjM1JwWm5segpaV011WTI5dE1CNFhE\nVEl4TURreU56SXdOVEF3T1ZvWERUTXhNRGt5TlRJd05UQXdPRm93TWpFVE1CRUdBMVVFCkNoTUtW\nR1Z6ZEdsbWVWTmxZekViTUJrR0ExVUVBeE1TWkdWMkxuUmxjM1JwWm5selpXTXVZMjl0TUlJQklq\nQU4KQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBbGtzOGV1Y2FmQktFZ21WTnFi\nd1FCTHZlcUpxMQp3WWFrajYyYkt5UG5CVEZGM0wrb1lta2Nua0YySm9iSnBUdGNRSmV2MGhxcWZr\nR0toSDdJQ1VaUmtYbnFTUldXCjZ3QWpVL2E2UnE5YkIxTENQM05CUm41cXV4bWNSMjUwcHZoejYy\ncGtrNDJUajRrNjlISTBRQlI5eWpTcjA5cmoKUGRTQVBZdDdIaXV1NnZjRVlZRXlQclNYQjdGSGdY\nTEtoUnJSdW56UEVCSFdHL212YWs2OHhRZ1ZUZDMyNWpMbgpvT3J6R3IzNFNFaVM4cnlHOHVPOUY2\nT0tKc21aZ0ExbmhCUlVkbGYyc0Y1SXpFUUUxa0NvSG92MENpV2hsK3BlCitkOXhUYWFjaVlSaFpR\neUJaaG9IaUwwREc1OG1qNFVUOWRJVXVEWWc1Z1YwQmdjaEF3ZFVmQW0zZ3dJREFRQUIKbzJNd1lU\nQU9CZ05WSFE4QkFmOEVCQU1DQVFZd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBZEJnTlZIUTRFRmdR\nVQp2bUU5WlByK0tmbnYwS2VHK0FIbm9kZGNvLzB3SHdZRFZSMGpCQmd3Rm9BVXZtRTlaUHIrS2Zu\ndjBLZUcrQUhuCm9kZGNvLzB3RFFZSktvWklodmNOQVFFTEJRQURnZ0VCQUVLYzJQVnhOTElRbkl3\nRC9qTW8zZ2RKeVlZK2FSSW8KbGZBQ3pNU2xRNVpHcG1zUWN6c05WamJBUWtsMCtxblFuVWtQUGNR\nV2xpNWt0dWZQMGZkTDZVSGUxQVMzYy9tMAppclYxaEJ0L0JzWnpOUTc2NTVFV1VqcW8yVVZSMnA0\nS1NXek9tV1JrVWY5aER5dktuOXZITzl4RjFtZUMzZDUyCmM4L0JuZ3FGRWJhTEVuek5jdU13czdO\ncVpYY2tBYVloQWpRcWJOVTJ0Zi9XTkp2RjlLS21sZldwb3IvMmZQQkYKakVwRTNyUk1sWWhrM0hH\nZzNNRkxZWGY0UmtvVmFCa3piMHd5cEJCZ29kcExNdENSMmVWR3JxZ25jQnJ5TkpiaApGUUo5eG1U\nVmt1YzhaUTh5d3lxVDNUVHRkQzE4UVI2MGlPdFo4bkdvQXNmMGJNUG43dUpFRTU0PQotLS0tLUVO\nRCBDRVJUSUZJQ0FURS0tLS0t"
+    },
+    "3ba7b6cc4e95469d4d334b49cb257ad8537076fa84b0ca87ff4ecfe6a54680c1": {
+      "certificate": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUI5ekNDQVh5Z0F3SUJBZ0lVQUxaTkFQRmR4\nSFB3amVEbG9Ed3lZQ2hBTy80d0NnWUlLb1pJemowRUF3TXcKS2pFVk1CTUdBMVVFQ2hNTWMybG5j\nM1J2Y21VdVpHVjJNUkV3RHdZRFZRUURFd2h6YVdkemRHOXlaVEFlRncweQpNVEV3TURjeE16VTJO\nVGxhRncwek1URXdNRFV4TXpVMk5UaGFNQ294RlRBVEJnTlZCQW9UREhOcFozTjBiM0psCkxtUmxk\nakVSTUE4R0ExVUVBeE1JYzJsbmMzUnZjbVV3ZGpBUUJnY3Foa2pPUFFJQkJnVXJnUVFBSWdOaUFB\nVDcKWGVGVDRyYjNQUUd3UzRJYWp0TGszL09sbnBnYW5nYUJjbFlwc1lCcjVpKzR5bkIwN2NlYjNM\nUDBPSU9aZHhleApYNjljNWlWdXlKUlErSHowNXlpK1VGM3VCV0FsSHBpUzVzaDArSDJHSEU3U1hy\nazFFQzVtMVRyMTlMOWdnOTJqCll6QmhNQTRHQTFVZER3RUIvd1FFQXdJQkJqQVBCZ05WSFJNQkFm\nOEVCVEFEQVFIL01CMEdBMVVkRGdRV0JCUlkKd0I1ZmtVV2xacWw2ekpDaGt5TFFLc1hGK2pBZkJn\nTlZIU01FR0RBV2dCUll3QjVma1VXbFpxbDZ6SkNoa3lMUQpLc1hGK2pBS0JnZ3Foa2pPUFFRREF3\nTnBBREJtQWpFQWoxbkhlWFpwKzEzTldCTmErRURzRFA4RzFXV2cxdENNCldQL1dIUHFwYVZvMGpo\nc3dlTkZaZ1NzMGVFN3dZSTRxQWpFQTJXQjlvdDk4c0lrb0YzdlpZZGQzL1Z0V0I1YjkKVE5NZWE3\nSXgvc3RKNVRmY0xMZUFCTEU0Qk5KT3NRNHZuQkhKCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0="
+    }
+  }
+}

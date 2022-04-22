@@ -1,0 +1,8 @@
+run:
+  spiffe-socket: "unix:///run/spire/sockets/agent.sock"
+  rekor-server: "https://log.testifysec.io"
+  attestations:
+    - gitlab
+    - gcp-iit
+    - git
+  outfile: /dev/null

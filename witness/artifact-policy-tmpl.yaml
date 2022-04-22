@@ -1,0 +1,150 @@
+expires: "2022-12-17T23:57:40-05:00"
+steps:
+  commit:
+    name: commit
+    attestations:
+      - type: https://witness.dev/attestations/product/v0.1
+    functionaries:
+      - type: root
+        certConstraint:
+          commonname: "*"
+          dnsnames:
+            - "*"
+          emails:
+            - "cole@testifysec.com"
+          organizations:
+            - "*"
+          uris:
+            - "*"
+          roots:
+            - "{{FULCIO_ROOT_ID}}"
+  clone:
+    artifactsFrom:
+      - commit
+    name: clone
+    attestations:
+      - type: https://witness.dev/attestations/material/v0.1
+      - type: https://witness.dev/attestations/product/v0.1
+      - type: https://witness.dev/attestations/command-run/v0.1
+      - type: https://witness.dev/attestations/gitlab/v0.1
+        regoPolicies:
+          - name:  "gitlab"
+            module: "{{GITLAB_MODULE}}"
+      - type: https://witness.dev/attestations/gcp-iit/v0.1
+        regoPolicies:
+          - name:  "gcp-iit"
+            module: "{{GCP_IIT_MODULE}}"
+    functionaries:
+      - type: root
+        certConstraint:
+          commonname: "*"
+          dnsnames:
+            - "*"
+          emails:
+            - "*"
+          organizations:
+            - "*"
+          uris:
+            - "{{SPIFFEID}}"
+          roots:
+            - "{{ROOT_ID}}"
+  deps:
+    artifactsFrom:
+      - clone
+    name: deps
+    attestations:
+      - type: https://witness.dev/attestations/material/v0.1
+      - type: https://witness.dev/attestations/product/v0.1
+      - type: https://witness.dev/attestations/command-run/v0.1
+      - type: https://witness.dev/attestations/git/v0.1
+      - type: https://witness.dev/attestations/gitlab/v0.1
+        regoPolicies:
+          - name:  "gitlab"
+            module: "{{GITLAB_MODULE}}"
+      - type: https://witness.dev/attestations/gcp-iit/v0.1
+        regoPolicies:
+          - name:  "gcp-iit"
+            module: "{{GCP_IIT_MODULE}}"
+    functionaries:
+      - type: root
+        certConstraint:
+          commonname: "*"
+          dnsnames:
+            - "*"
+          emails:
+            - "*"
+          organizations:
+            - "*"
+          uris:
+            - "{{SPIFFEID}}"
+          roots:
+            - "{{ROOT_ID}}"
+  build:
+    artifactsFrom:
+      - deps
+    name: build
+    attestations:
+      - type: https://witness.dev/attestations/material/v0.1
+      - type: https://witness.dev/attestations/product/v0.1
+      - type: https://witness.dev/attestations/command-run/v0.1
+      - type: https://witness.dev/attestations/git/v0.1
+      - type: https://witness.dev/attestations/gitlab/v0.1
+        regoPolicies:
+          - name:  "gitlab"
+            module: "{{GITLAB_MODULE}}"
+      - type: https://witness.dev/attestations/gcp-iit/v0.1
+        regoPolicies:
+          - name:  "gcp-iit"
+            module: "{{GCP_IIT_MODULE}}"
+    functionaries:
+      - type: root
+        certConstraint:
+          commonname: "*"
+          dnsnames:
+            - "*"
+          emails:
+            - "*"
+          organizations:
+            - "*"
+          uris:
+            - "{{SPIFFEID}}"
+          roots:
+            - "{{ROOT_ID}}"
+  package:
+    artifactsFrom:
+      - build
+    name: package
+    attestations:
+      - type: https://witness.dev/attestations/material/v0.1
+      - type: https://witness.dev/attestations/product/v0.1
+      - type: https://witness.dev/attestations/command-run/v0.1
+      - type: https://witness.dev/attestations/git/v0.1
+      - type: https://witness.dev/attestations/gitlab/v0.1
+        regoPolicies:
+          - name:  "gitlab"
+            module: "{{GITLAB_MODULE}}"
+      - type: https://witness.dev/attestations/gcp-iit/v0.1
+        regoPolicies:
+          - name:  "gcp-iit"
+            module: "{{GCP_IIT_MODULE}}"
+    functionaries:
+      - type: root
+        certConstraint:
+          commonname: "*"
+          dnsnames:
+            - "*"
+          emails:
+            - "*"
+          organizations:
+            - "*"
+          uris:
+            - "{{SPIFFEID}}"
+          roots:
+            - "{{ROOT_ID}}"
+roots:
+  "{{ROOT_ID}}":
+    certificate: |
+      "{{ROOT_CERT}}"
+  "{{FULCIO_ROOT_ID}}":
+    certificate: |
+      "{{FULCIO_ROOT_CERT}}"
