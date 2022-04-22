@@ -1,5 +1,6 @@
 image: registry.gitlab.com/testifysec/spire/builder:v0.0.1
 
+
 stages:
   - clone
   - build
