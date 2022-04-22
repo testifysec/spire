@@ -6,3 +6,7 @@ run:
     - gcp-iit
     - git
   outfile: /dev/null
+verify:
+    publickey: ./witness/testpub.pem
+    rekor-server: https://log.testifysec.io
+
