@@ -1,10 +1,8 @@
-registry.gitlab.com/testifysec/spire/builder:v0.0.1
+image: registry.gitlab.com/testifysec/spire/builder:v0.0.1
 
 stages:
   - clone
-  - deps
   - build
-  - package
   - verify
 
 
@@ -22,18 +20,6 @@ clone:
       - commithash
     paths:
       - ./*
-deps:
-  dependencies:
-    - "clone"
-  stage: deps
-  script:
-    - |-
-      witness -c .witness-ci.yaml run -s deps -- /bin/sh -c "npm i"
-  artifacts:
-    exclude:
-      - .git
-    paths:
-      - ./*
 build:
   dependencies:
     - "deps"
@@ -41,22 +27,13 @@ build:
   script:
     - |-
       witness -c .witness-ci.yaml run -s build -- /bin/sh -c \
-      "npm run build:prod"
+      "make build-witness-ci"
   artifacts:
     exclude:
       - .git
     paths:
-      - ./*
-package:
-  stage: package
-  script:
-    - |-
-      witness -c .witness-ci.yaml run -s package -- /bin/sh -c \
-      "npx pkg . --compress Brotli -t node16-linux-x64  -o snyk-linux"
-  artifacts:
-    paths:
-      - "snyk-linux"
+      - ./bin/*
 verify:
   stage: verify
   script:
-    - witness verify -k ./policy/testpub.pem -p ./policy/artifact-policy.signed.json -r https://log.testifysec.io -f 
+    - for i in $(ls -1 ./bin/*); do witness -c ./witness/.witness-ci.yaml verify -p ./witness/artifact-policy.signed.json -f $i; done
