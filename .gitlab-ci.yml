@@ -25,15 +25,15 @@ build:
     - "clone"
   stage: build
   script:
-    - |-
-      witness -c .witness-ci.yaml run -s build -- /bin/sh -c \
-      "make build-witness-ci"
+    - "make build-witness-ci"
   artifacts:
     exclude:
       - .git
     paths:
       - ./bin/*
 verify:
+  dependencies:
+    - "build"
   stage: verify
   script:
     - for i in $(ls -1 ./bin/*); do witness -c ./witness/.witness-ci.yaml verify -p ./witness/artifact-policy.signed.json -f $i; done
