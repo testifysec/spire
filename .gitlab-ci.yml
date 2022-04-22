@@ -21,7 +21,7 @@ clone:
       - ./*
 build:
   dependencies:
-    - "deps"
+    - "clone"
   stage: build
   script:
     - |-
