@@ -1,23 +1,5 @@
 expires: "2022-12-17T23:57:40-05:00"
 steps:
-  commit:
-    name: commit
-    attestations:
-      - type: https://witness.dev/attestations/product/v0.1
-    functionaries:
-      - type: root
-        certConstraint:
-          commonname: "*"
-          dnsnames:
-            - "*"
-          emails:
-            - "cole@testifysec.com"
-          organizations:
-            - "*"
-          uris:
-            - "*"
-          roots:
-            - "3ba7b6cc4e95469d4d334b49cb257ad8537076fa84b0ca87ff4ecfe6a54680c1"
   clone:
     artifactsFrom:
       - commit
