@@ -29,8 +29,6 @@ steps:
           roots:
             - "{{ROOT_ID}}"
   build:
-    artifactsFrom:
-      - clone
     name: build
     attestations:
       - type: https://witness.dev/attestations/material/v0.1

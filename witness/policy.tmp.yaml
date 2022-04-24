@@ -29,8 +29,6 @@ steps:
           roots:
             - "bc528aa5c6af42790e2e1d977bc0b1b7dcd15e2e93ea0d8029a46fc9b73a53a1"
   build:
-    artifactsFrom:
-      - clone
     name: build
     attestations:
       - type: https://witness.dev/attestations/material/v0.1
