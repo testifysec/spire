@@ -1,7 +1,27 @@
 expires: "2022-12-17T23:57:40-05:00"
 steps:
+  commit:
+    name: commit
+    attestations:
+      - type: https://witness.dev/attestations/product/v0.1
+    functionaries:
+      - type: root
+        certConstraint:
+          commonname: "*"
+          dnsnames:
+            - "*"
+          emails:
+            - "*"
+          organizations:
+            - "*"
+          uris:
+            - "*"
+          roots:
+            - "{{FULCIO_ROOT_ID}}"
   clone:
     name: clone
+    # artifactsFrom:
+    #   - commit
     attestations:
       - type: https://witness.dev/attestations/material/v0.1
       - type: https://witness.dev/attestations/product/v0.1
@@ -30,6 +50,8 @@ steps:
             - "{{ROOT_ID}}"
   build:
     name: build
+    artifactsFrom:
+      - clone
     attestations:
       - type: https://witness.dev/attestations/material/v0.1
       - type: https://witness.dev/attestations/product/v0.1
