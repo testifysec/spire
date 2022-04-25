@@ -34,6 +34,67 @@
     },
     "clone": {
       "name": "clone",
+      "artifactsFrom": [
+        "commit"
+      ],
+      "attestations": [
+        {
+          "type": "https://witness.dev/attestations/material/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/product/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/command-run/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/gitlab/v0.1",
+          "regoPolicies": [
+            {
+              "name": "gitlab",
+              "module": "cGFja2FnZSBnaXRsYWJfZGVtbwoKCmRlbnlbbXNnXXsgIAogICAgaW5wdXQuand0LmNsYWltcy5pc3MgIT0gImdpdGxhYi5jb20iCiAgICBtc2cgPSAiaXNzdWVyIGlzIG5vdCBnaXRsYWIuY29tIgp9"
+            }
+          ]
+        },
+        {
+          "type": "https://witness.dev/attestations/gcp-iit/v0.1",
+          "regoPolicies": [
+            {
+              "name": "gcp-iit",
+              "module": "cGFja2FnZSBnY3BfZGVtbwoKZGVueVttc2ddewogICAgaW5wdXQucHJvamVjdF9pZCAhPSAiMzI0MzIyIgogICAgbXNnID0gIlByb2plY3QgSUQgaXMgbm90IGNvcnJlY3QiCgp9CgpkZW55W21zZ117CiAgICBpbnB1dC5jbHVzdGVyX2xvY2F0aW9uICE9ICJ1cy1lYXN0MS1iIgogICAgbXNnID0gIkNsdXN0ZXIgbG9jYXRpb24gaXMgbm90IGNvcnJlY3QiCn0KCmRlbnlbbXNnXXsKICAgIGlucHV0Lmp3dC5jbGFpbXMuaXNzICE9ICJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iCiAgICBtc2cgPSAiSldUIGlzc3VlciBpcyBub3QgY29ycmVjdCIKfQoK"
+            }
+          ]
+        }
+      ],
+      "functionaries": [
+        {
+          "type": "root",
+          "certConstraint": {
+            "commonname": "*",
+            "dnsnames": [
+              "*"
+            ],
+            "emails": [
+              "*"
+            ],
+            "organizations": [
+              "*"
+            ],
+            "uris": [
+              "spiffe://dev.testifysec.com/witness-demo/builder"
+            ],
+            "roots": [
+              "bc528aa5c6af42790e2e1d977bc0b1b7dcd15e2e93ea0d8029a46fc9b73a53a1"
+            ]
+          }
+        }
+      ]
+    },
+    "deps": {
+      "name": "deps",
+      "artifactsFrom": [
+        "clone"
+      ],
       "attestations": [
         {
           "type": "https://witness.dev/attestations/material/v0.1"
@@ -90,7 +151,7 @@
     "build": {
       "name": "build",
       "artifactsFrom": [
-        "clone"
+        "deps"
       ],
       "attestations": [
         {

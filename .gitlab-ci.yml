@@ -71,7 +71,7 @@ build-oidc-discovery-provider:
   dependencies:
     - "deps"
   script:
-    - witness run -s build -c witness/.witness-ci.yaml -o /dev/null -- bash -c "go build  -ldflags '-s -w -X github.com/spiffe/spire/pkg/common/version.githash='${CI_COMMIT_SHORT_SHA} -o bin/oidc-discovery-provider ./support/k8s/oidc-discovery-provider"
+    - witness run -s build -c witness/.witness-ci.yaml -o /dev/null -- bash -c "go build  -ldflags '-s -w -X github.com/spiffe/spire/pkg/common/version.githash='${CI_COMMIT_SHORT_SHA} -o bin/oidc-discovery-provider ./support/oidc-discovery-provider"
   artifacts:
     paths:
       - ./bin/*

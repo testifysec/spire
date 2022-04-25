@@ -20,8 +20,38 @@ steps:
             - "{{FULCIO_ROOT_ID}}"
   clone:
     name: clone
-    # artifactsFrom:
-    #   - commit
+    artifactsFrom:
+      - commit
+    attestations:
+      - type: https://witness.dev/attestations/material/v0.1
+      - type: https://witness.dev/attestations/product/v0.1
+      - type: https://witness.dev/attestations/command-run/v0.1
+      - type: https://witness.dev/attestations/gitlab/v0.1
+        regoPolicies:
+          - name:  "gitlab"
+            module: "{{GITLAB_MODULE}}"
+      - type: https://witness.dev/attestations/gcp-iit/v0.1
+        regoPolicies:
+          - name:  "gcp-iit"
+            module: "{{GCP_IIT_MODULE}}"
+    functionaries:
+      - type: root
+        certConstraint:
+          commonname: "*"
+          dnsnames:
+            - "*"
+          emails:
+            - "*"
+          organizations:
+            - "*"
+          uris:
+            - "{{SPIFFEID}}"
+          roots:
+            - "{{ROOT_ID}}"
+  deps:
+    name: deps
+    artifactsFrom:
+       - clone
     attestations:
       - type: https://witness.dev/attestations/material/v0.1
       - type: https://witness.dev/attestations/product/v0.1
@@ -51,7 +81,7 @@ steps:
   build:
     name: build
     artifactsFrom:
-      - clone
+      - deps
     attestations:
       - type: https://witness.dev/attestations/material/v0.1
       - type: https://witness.dev/attestations/product/v0.1
