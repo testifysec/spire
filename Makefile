@@ -225,7 +225,11 @@ go_ldflags := '${go_ldflags}'
 # Build Targets
 #############################################################################
 
-build-witness: tidy bin/spire-server bin/spire-agent bin/k8s-workload-registrar bin/oidc-discovery-provider
+vendordeps: 
+	echo "vendoring deps"
+	go mod vendor
+
+build-witness: vendordeps bin/spire-server bin/spire-agent bin/k8s-workload-registrar bin/oidc-discovery-provider
 
 define binary_rule
 .PHONY: $1
