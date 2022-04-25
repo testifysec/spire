@@ -18,6 +18,7 @@ clone:
       - commithash
     paths:
       - ./*
+
 deps:
   stage: deps
   dependencies:
@@ -30,6 +31,8 @@ deps:
     paths:
       - ./*
       - ./vendor/*
+
+# Build the binaries
 build-server:
   stage: build
   dependencies:
@@ -39,6 +42,10 @@ build-server:
   artifacts:
     paths:
       - ./bin/*
+      - ./witness/.witness-ci.yaml
+      - ./witness/artifact-policy.signed.json
+      - ./witness/testpub.pem
+
 build-agent:
   stage: build
   dependencies:
@@ -47,11 +54,34 @@ build-agent:
     - witness run -s build -c witness/.witness-ci.yaml -o /dev/null -- bash -c "go build  -ldflags '-s -w -X github.com/spiffe/spire/pkg/common/version.githash='${CI_COMMIT_SHORT_SHA} -o bin/spire-agent ./cmd/spire-agent"
   artifacts:
     paths:
-      - ./bin/*      
+      - ./bin/*
+
+build-k8s-workload-registrar:
+  stage: build
+  dependencies:
+    - "deps"
+  script:
+    - witness run -s build -c witness/.witness-ci.yaml -o /dev/null -- bash -c "go build  -ldflags '-s -w -X github.com/spiffe/spire/pkg/common/version.githash='${CI_COMMIT_SHORT_SHA} -o bin/k8s-workload-registrar ./support/k8s/k8s-workload-registrar"
+  artifacts:
+    paths:
+      - ./bin/*
+
+build-oidc-discovery-provider:
+  stage: build
+  dependencies:
+    - "deps"
+  script:
+    - witness run -s build -c witness/.witness-ci.yaml -o /dev/null -- bash -c "go build  -ldflags '-s -w -X github.com/spiffe/spire/pkg/common/version.githash='${CI_COMMIT_SHORT_SHA} -o bin/oidc-discovery-provider ./support/k8s/oidc-discovery-provider"
+  artifacts:
+    paths:
+      - ./bin/*
+
 verify:
   dependencies:
     - "build-server"
     - "build-agent"
+    - "build-k8s-workload-registrar"
+    - "build-oidc-discovery-provider"
   stage: verify
   script:
     - for i in $(ls -1 ./bin/*); do witness -c ./witness/.witness-ci.yaml verify -p ./witness/artifact-policy.signed.json -f $i; done
