@@ -1,11 +1,9 @@
 image: registry.gitlab.com/testifysec/spire/builder:v0.0.2
-
-
 stages:
   - clone
+  - deps
   - build
   - verify
-
 variables:
   GIT_STRATEGY: none
 clone:
@@ -20,12 +18,23 @@ clone:
       - commithash
     paths:
       - ./*
-build:
+deps:
+  stage: deps
   dependencies:
     - "clone"
+  script: 
+    - witness -c .witness-ci.yaml run -s deps -- /bin/sh -c "go mod vendor"
+  artifacts:
+    exclude:
+      - .git
+    paths:
+      - ./*    
+build:
   stage: build
+  dependencies:
+    - "deps"
   script:
-    - "make build-witness"
+    - make build-witness
   artifacts:
     exclude:
       - .git
@@ -40,3 +49,6 @@ verify:
   stage: verify
   script:
     - for i in $(ls -1 ./bin/*); do witness -c ./witness/.witness-ci.yaml verify -p ./witness/artifact-policy.signed.json -f $i; done
+  artifacts:
+    paths:
+      - ./bin/*
