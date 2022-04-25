@@ -28,7 +28,8 @@ deps:
     exclude:
       - .git
     paths:
-      - ./*    
+      - ./*
+      - ./vendor/*
 build:
   stage: build
   dependencies:

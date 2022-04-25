@@ -229,13 +229,13 @@ vendordeps:
 	echo "vendoring deps"
 	go mod vendor
 
-build-witness: vendordeps bin/spire-server bin/spire-agent bin/k8s-workload-registrar bin/oidc-discovery-provider
+build-witness: bin/spire-server bin/spire-agent bin/k8s-workload-registrar bin/oidc-discovery-provider
 
 define binary_rule
 .PHONY: $1
 $1: | go-check bin/
 	@echo Building $1...
-	witness run -s build -c witness/.witness-ci.yaml -o /dev/null -- bash -c "go build $$(go_flags) -ldflags $$(go_ldflags) -o $1$(exe) $2"
+	witness run -s build -c witness/.witness-ci.yaml -o /dev/null -- bash -c "go build $$(go_flags) -ldflags $$(go_ldflags) -o $1$(exe) $2 -mod=vendor"
 endef
 
 # main SPIRE binaries
@@ -258,8 +258,7 @@ build-static: tidy bin/spire-server-static bin/spire-agent-static bin/k8s-worklo
 # https://7thzero.com/blog/golang-w-sqlite3-docker-scratch-image
 define binary_rule_static
 .PHONY: $1
-$1: | go-check bin/
-	@echo Building $1...
+$1: @echo Building $1...
 	$(E)$(go_path) CGO_ENABLED=1 go build $$(go_flags) -ldflags '-s -w -linkmode external -extldflags "-static"' -o $1$(exe) $2
 
 endef
