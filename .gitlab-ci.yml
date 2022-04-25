@@ -30,23 +30,28 @@ deps:
     paths:
       - ./*
       - ./vendor/*
-build:
+build-server:
   stage: build
   dependencies:
     - "deps"
   script:
-    - make build-witness
+    - witness run -s build -c witness/.witness-ci.yaml -o /dev/null -- bash -c "go build  -ldflags '-s -w -X github.com/spiffe/spire/pkg/common/version.githash='${CI_COMMIT_SHORT_SHA} -o bin/spire-server ./cmd/spire-server"
   artifacts:
-    exclude:
-      - .git
     paths:
       - ./bin/*
-      - ./witness/.witness-ci.yaml
-      - ./witness/artifact-policy.signed.json
-      - ./witness/testpub.pem
+build-agent:
+  stage: build
+  dependencies:
+    - "deps"
+  script:
+    - witness run -s build -c witness/.witness-ci.yaml -o /dev/null -- bash -c "go build  -ldflags '-s -w -X github.com/spiffe/spire/pkg/common/version.githash='${CI_COMMIT_SHORT_SHA} -o bin/spire-agent ./cmd/spire-agent"
+  artifacts:
+    paths:
+      - ./bin/*      
 verify:
   dependencies:
-    - "build"
+    - "build-server"
+    - "build-agent"
   stage: verify
   script:
     - for i in $(ls -1 ./bin/*); do witness -c ./witness/.witness-ci.yaml verify -p ./witness/artifact-policy.signed.json -f $i; done
