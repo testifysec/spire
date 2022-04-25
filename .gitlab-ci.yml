@@ -23,7 +23,7 @@ deps:
   dependencies:
     - "clone"
   script: 
-    - witness -c .witness-ci.yaml run -s deps -- /bin/sh -c "go mod vendor"
+    - witness -c ./witness/.witness-ci.yaml run -s deps -- /bin/sh -c "go mod vendor"
   artifacts:
     exclude:
       - .git
