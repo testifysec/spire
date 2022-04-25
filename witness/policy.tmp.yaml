@@ -4,6 +4,7 @@ steps:
     name: commit
     attestations:
       - type: https://witness.dev/attestations/product/v0.1
+      - type: https://witness.dev/attestations/product/v0.1
     functionaries:
       - type: root
         certConstraint:
@@ -11,7 +12,8 @@ steps:
           dnsnames:
             - "*"
           emails:
-            - "*"
+            - "cole@testifysec.com"
+            - "colek42@gmail.com"
           organizations:
             - "*"
           uris:

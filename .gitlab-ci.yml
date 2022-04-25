@@ -4,6 +4,8 @@ stages:
   - deps
   - build
   - verify
+  - upload
+  - release
 variables:
   GIT_STRATEGY: none
 clone:
@@ -88,3 +90,22 @@ verify:
   artifacts:
     paths:
       - ./bin/*
+      - ./witness/artifact-policy.signed.json
+      - ./witness/testpub.pem
+
+upload:
+  stage: upload
+  image: curlimages/curl:latest
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file bin/spire-agent ${PACKAGE_REGISTRY_URL}/spire-agent/${CI_COMMIT_TAG}/bin/spire-agent
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  script:
+      - |
+        release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
+          --assets-link "{\"name\":\"spire-agent",\"url\":\"${PACKAGE_REGISTRY_URL}/spire-agent/${CI_COMMIT_TAG}/bin/spire-agent" \

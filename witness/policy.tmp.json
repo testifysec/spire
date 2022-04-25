@@ -6,6 +6,9 @@
       "attestations": [
         {
           "type": "https://witness.dev/attestations/product/v0.1"
+        },
+        {
+          "type": "https://witness.dev/attestations/product/v0.1"
         }
       ],
       "functionaries": [
@@ -17,7 +20,8 @@
               "*"
             ],
             "emails": [
-              "*"
+              "cole@testifysec.com",
+              "colek42@gmail.com"
             ],
             "organizations": [
               "*"
