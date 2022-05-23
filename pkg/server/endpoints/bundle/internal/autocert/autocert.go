@@ -443,6 +443,7 @@ func (m *Manager) HTTPHandler(fallback http.Handler) http.Handler {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
+		// deepcode ignore XSS: <data comes from acme server>
 		w.Write(data)
 	})
 }
