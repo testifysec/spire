@@ -580,14 +580,16 @@ func (ds *Plugin) openConnection(config *configuration, isReadOnly bool) error {
 	return nil
 }
 
-func (ds *Plugin) closeDB() {
+func (ds *Plugin) Close() error {
+	var errs errs.Group
 	if ds.db != nil {
-		ds.db.Close()
+		errs.Add(ds.db.Close())
 	}
 
 	if ds.roDb != nil {
-		ds.roDb.Close()
+		errs.Add(ds.roDb.Close())
 	}
+	return errs.Err()
 }
 
 // withReadModifyWriteTx wraps the operation in a transaction appropriate for
@@ -1023,6 +1025,7 @@ func createAttestedNode(tx *gorm.DB, node *common.AttestedNode) (*common.Atteste
 		ExpiresAt:       time.Unix(node.CertNotAfter, 0),
 		NewSerialNumber: node.NewCertSerialNumber,
 		NewExpiresAt:    nullableUnixTimeToDBTime(node.NewCertNotAfter),
+		CanReattest:     node.CanReattest,
 	}
 
 	if err := tx.Create(&model).Error; err != nil {
@@ -1266,6 +1269,15 @@ func buildListAttestedNodesQueryCTE(req *datastore.ListAttestedNodesRequest, dbT
 		}
 	}
 
+	// Filter by CanReattest. This is similar to ByBanned
+	if req.ByCanReattest != nil {
+		if *req.ByCanReattest {
+			builder.WriteString("\t\tAND can_reattest = true\n")
+		} else {
+			builder.WriteString("\t\tAND can_reattest = false\n")
+		}
+	}
+
 	builder.WriteString(")")
 	// Fetch all selectors from filtered entries
 	if fetchSelectors {
@@ -1284,14 +1296,15 @@ func buildListAttestedNodesQueryCTE(req *datastore.ListAttestedNodesRequest, dbT
 
 	// Add expected fields
 	builder.WriteString(`
-SELECT 
+SELECT
 	id AS e_id,
 	spiffe_id,
 	data_type,
 	serial_number,
 	expires_at,
 	new_serial_number,
-	new_expires_at,`)
+	new_expires_at,
+	can_reattest,`)
 
 	// Add "optional" fields for selectors
 	if fetchSelectors {
@@ -1424,8 +1437,8 @@ SELECT
 	N.serial_number,
 	N.expires_at,
 	N.new_serial_number,
-	N.new_expires_at,`)
-
+	N.new_expires_at,
+	N.can_reattest,`)
 	// Add "optional" fields for selectors
 	if fetchSelectors {
 		builder.WriteString(`
@@ -1480,6 +1493,15 @@ FROM attested_node_entries N
 				builder.WriteString(" AND N.serial_number = ''")
 			} else {
 				builder.WriteString(" AND N.serial_number <> ''")
+			}
+		}
+
+		// Filter by CanReattest. This is similar to ByBanned
+		if req.ByCanReattest != nil {
+			if *req.ByCanReattest {
+				builder.WriteString("\t\tAND can_reattest = true\n")
+			} else {
+				builder.WriteString("\t\tAND can_reattest = false\n")
 			}
 		}
 		return nil
@@ -1582,7 +1604,9 @@ func updateAttestedNode(tx *gorm.DB, n *common.AttestedNode, mask *common.Attest
 	if mask.NewCertSerialNumber {
 		updates["new_serial_number"] = n.NewCertSerialNumber
 	}
-
+	if mask.CanReattest {
+		updates["can_reattest"] = n.CanReattest
+	}
 	if err := tx.Model(&model).Updates(updates).Error; err != nil {
 		return nil, sqlError.Wrap(err)
 	}
@@ -2877,6 +2901,7 @@ type nodeRow struct {
 	ExpiresAt       sql.NullTime
 	NewSerialNumber sql.NullString
 	NewExpiresAt    sql.NullTime
+	CanReattest     sql.NullBool
 	SelectorType    sql.NullString
 	SelectorValue   sql.NullString
 }
@@ -2890,6 +2915,7 @@ func scanNodeRow(rs *sql.Rows, r *nodeRow) error {
 		&r.ExpiresAt,
 		&r.NewSerialNumber,
 		&r.NewExpiresAt,
+		&r.CanReattest,
 		&r.SelectorType,
 		&r.SelectorValue,
 	))
@@ -2928,6 +2954,10 @@ func fillNodeFromRow(node *common.AttestedNode, r *nodeRow) error {
 			Type:  r.SelectorType.String,
 			Value: r.SelectorValue.String,
 		})
+	}
+
+	if r.CanReattest.Valid {
+		node.CanReattest = r.CanReattest.Bool
 	}
 
 	return nil
@@ -3627,6 +3657,7 @@ func modelToAttestedNode(model AttestedNode) *common.AttestedNode {
 		CertNotAfter:        model.ExpiresAt.Unix(),
 		NewCertSerialNumber: model.NewSerialNumber,
 		NewCertNotAfter:     nullableDBTimeToUnixTime(model.NewExpiresAt),
+		CanReattest:         model.CanReattest,
 	}
 }
 
