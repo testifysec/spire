@@ -36,7 +36,6 @@ require (
 	github.com/google/go-attestation v0.4.4-0.20220404204839-8820d49b18d9
 	github.com/google/go-cmp v0.5.8
 	github.com/google/go-tpm v0.3.3
-	github.com/google/go-tpm-tools v0.3.8
 	github.com/googleapis/gax-go/v2 v2.4.0
 	github.com/gorilla/handlers v1.5.1
 	github.com/hashicorp/go-hclog v1.2.0
@@ -78,6 +77,13 @@ require (
 	k8s.io/kube-aggregator v0.23.3
 	k8s.io/utils v0.0.0-20211116205334-6203023598ed
 	sigs.k8s.io/controller-runtime v0.11.2
+)
+
+require github.com/google/go-tpm-tools v0.3.1
+
+require (
+	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65 // indirect
+	sigs.k8s.io/json v0.0.0-20211020170558-c049b76a60c6 // indirect
 )
 
 require (
@@ -201,9 +207,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	k8s.io/apiextensions-apiserver v0.23.5 // indirect
 	k8s.io/component-base v0.23.5 // indirect
-	k8s.io/klog/v2 v2.30.0 // indirect
-	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65 // indirect
-	sigs.k8s.io/json v0.0.0-20211020170558-c049b76a60c6 // indirect
+	k8s.io/klog/v2 v2.30.0 // indirect; indirectspire/pkg/agent/b76a60c6 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
