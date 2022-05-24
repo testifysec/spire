@@ -22,34 +22,47 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/google/go-attestation/attest"
 
 	"github.com/hashicorp/hcl"
 	nodeattestorv1 "github.com/spiffe/spire-plugin-sdk/proto/spire/plugin/agent/nodeattestor/v1"
 	configv1 "github.com/spiffe/spire-plugin-sdk/proto/spire/service/common/config/v1"
 
+	"github.com/spiffe/spire/pkg/common/catalog"
 	common "github.com/spiffe/spire/pkg/common/plugin/tpm"
 )
 
-// TPMAttestorPlugin implements the nodeattestor Plugin interface
-type TPMAttestorPlugin struct {
-	nodeattestorv1.UnimplementedNodeAttestorServer
-	configv1.UnimplementedConfigServer
+func BuiltIn() catalog.BuiltIn {
+	return builtin(New())
+}
 
-	config *TPMAttestorPluginConfig
+func builtin(p *Plugin) catalog.BuiltIn {
+	return catalog.MakeBuiltIn(common.PluginName, nodeattestorv1.NodeAttestorPluginServer(p), configv1.ConfigServiceServer(p))
+}
+
+// Plugin implements the nodeattestor Plugin interface
+type Plugin struct {
+	nodeattestorv1.UnsafeNodeAttestorServer
+	configv1.UnsafeConfigServer
+
+	config *PluginConfig
 	tpm    *attest.TPM
 }
 
-type TPMAttestorPluginConfig struct {
+type PluginConfig struct {
 	trustDomain string
 }
 
-func New() *TPMAttestorPlugin {
-	return &TPMAttestorPlugin{}
+func New() *Plugin {
+	p := &Plugin{}
+	return p
 }
 
-func (p *TPMAttestorPlugin) Configure(ctx context.Context, req *configv1.ConfigureRequest) (*configv1.ConfigureResponse, error) {
-	config := &TPMAttestorPluginConfig{}
+func (p *Plugin) Configure(ctx context.Context, req *configv1.ConfigureRequest) (*configv1.ConfigureResponse, error) {
+	spew.Dump(req)
+
+	config := &PluginConfig{}
 	if err := hcl.Decode(config, req.HclConfiguration); err != nil {
 		return nil, fmt.Errorf("failed to decode configuration file: %v", err)
 	}
@@ -67,8 +80,9 @@ func (p *TPMAttestorPlugin) Configure(ctx context.Context, req *configv1.Configu
 	return &configv1.ConfigureResponse{}, nil
 }
 
-func (p *TPMAttestorPlugin) AidAttestation(stream nodeattestorv1.NodeAttestor_AidAttestationServer) error {
+func (p *Plugin) AidAttestation(stream nodeattestorv1.NodeAttestor_AidAttestationServer) error {
 	if p.config == nil {
+
 		return errors.New("plugin not configured")
 	}
 
@@ -121,7 +135,7 @@ func (p *TPMAttestorPlugin) AidAttestation(stream nodeattestorv1.NodeAttestor_Ai
 	return nil
 }
 
-func (p *TPMAttestorPlugin) calculateResponse(ec *attest.EncryptedCredential, aikBytes []byte) (*common.ChallengeResponse, error) {
+func (p *Plugin) calculateResponse(ec *attest.EncryptedCredential, aikBytes []byte) (*common.ChallengeResponse, error) {
 	tpm := p.tpm
 	if tpm == nil {
 		var err error
@@ -149,7 +163,7 @@ func (p *TPMAttestorPlugin) calculateResponse(ec *attest.EncryptedCredential, ai
 	}, nil
 }
 
-func (p *TPMAttestorPlugin) generateAttestationData() (*common.AttestationData, []byte, error) {
+func (p *Plugin) generateAttestationData() (*common.AttestationData, []byte, error) {
 	tpm := p.tpm
 	if tpm == nil {
 		var err error

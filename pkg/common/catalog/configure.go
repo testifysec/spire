@@ -3,6 +3,7 @@ package catalog
 import (
 	"context"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/sirupsen/logrus"
 	"github.com/spiffe/go-spiffe/v2/spiffeid"
 	configv1 "github.com/spiffe/spire-plugin-sdk/proto/spire/service/common/config/v1"
@@ -65,6 +66,7 @@ func (v1 *configurerV1) InitLog(logrus.FieldLogger) {
 }
 
 func (v1 *configurerV1) Configure(ctx context.Context, coreConfig CoreConfig, hclConfiguration string) error {
+	spew.Dump(coreConfig)
 	_, err := v1.ConfigServiceClient.Configure(ctx, &configv1.ConfigureRequest{
 		CoreConfiguration: coreConfig.v1(),
 		HclConfiguration:  hclConfiguration,

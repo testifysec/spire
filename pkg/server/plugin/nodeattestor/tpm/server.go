@@ -32,33 +32,45 @@ import (
 	"github.com/hashicorp/hcl"
 	nodeattestorv1 "github.com/spiffe/spire-plugin-sdk/proto/spire/plugin/server/nodeattestor/v1"
 	configv1 "github.com/spiffe/spire-plugin-sdk/proto/spire/service/common/config/v1"
+	"github.com/spiffe/spire/pkg/common/catalog"
 	common "github.com/spiffe/spire/pkg/common/plugin/tpm"
 )
 
-// TPMAttestorPlugin implements the nodeattestor Plugin interface
-type TPMAttestorPlugin struct {
+func BuiltIn() catalog.BuiltIn {
+	return builtin(New())
+}
+
+func builtin(p *Plugin) catalog.BuiltIn {
+	return catalog.MakeBuiltIn(common.PluginName,
+		nodeattestorv1.NodeAttestorPluginServer(p),
+		configv1.ConfigServiceServer(p),
+	)
+}
+
+// Plugin implements the nodeattestor Plugin interface
+type Plugin struct {
 	nodeattestorv1.UnimplementedNodeAttestorServer
 	configv1.UnimplementedConfigServer
 
-	config *TPMAttestorPluginConfig
+	config *PluginConfig
 }
 
-type TPMAttestorPluginConfig struct {
+type PluginConfig struct {
 	trustDomain string
 	CaPath      string `hcl:"ca_path"`
 	HashPath    string `hcl:"hash_path"`
 }
 
-func New() *TPMAttestorPlugin {
-	return &TPMAttestorPlugin{}
+func New() *Plugin {
+	return &Plugin{}
 }
 
-func NewFromConfig(config *TPMAttestorPluginConfig) *TPMAttestorPlugin {
-	return &TPMAttestorPlugin{config: config}
+func NewFromConfig(config *PluginConfig) *Plugin {
+	return &Plugin{config: config}
 }
 
-func (p *TPMAttestorPlugin) Configure(ctx context.Context, req *configv1.ConfigureRequest) (*configv1.ConfigureResponse, error) {
-	config := &TPMAttestorPluginConfig{}
+func (p *Plugin) Configure(ctx context.Context, req *configv1.ConfigureRequest) (*configv1.ConfigureResponse, error) {
+	config := &PluginConfig{}
 	if err := hcl.Decode(config, req.HclConfiguration); err != nil {
 		return nil, fmt.Errorf("failed to decode configuration file: %v", err)
 	}
@@ -100,7 +112,7 @@ func (p *TPMAttestorPlugin) Configure(ctx context.Context, req *configv1.Configu
 	return &configv1.ConfigureResponse{}, nil
 }
 
-func (p *TPMAttestorPlugin) Attest(stream nodeattestorv1.NodeAttestor_AttestServer) error {
+func (p *Plugin) Attest(stream nodeattestorv1.NodeAttestor_AttestServer) error {
 	if p.config == nil {
 		return errors.New("plugin not configured")
 	}
