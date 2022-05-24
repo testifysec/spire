@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/google/go-attestation/attest"
 
 	"github.com/hashicorp/hcl"
@@ -60,8 +59,6 @@ func New() *Plugin {
 }
 
 func (p *Plugin) Configure(ctx context.Context, req *configv1.ConfigureRequest) (*configv1.ConfigureResponse, error) {
-	spew.Dump(req)
-
 	config := &PluginConfig{}
 	if err := hcl.Decode(config, req.HclConfiguration); err != nil {
 		return nil, fmt.Errorf("failed to decode configuration file: %v", err)

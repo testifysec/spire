@@ -49,8 +49,8 @@ func builtin(p *Plugin) catalog.BuiltIn {
 
 // Plugin implements the nodeattestor Plugin interface
 type Plugin struct {
-	nodeattestorv1.UnimplementedNodeAttestorServer
-	configv1.UnimplementedConfigServer
+	nodeattestorv1.UnsafeNodeAttestorServer
+	configv1.UnsafeConfigServer
 
 	config *PluginConfig
 }
