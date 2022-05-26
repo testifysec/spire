@@ -91,8 +91,14 @@ func (p *Plugin) Configure(ctx context.Context, req *configv1.ConfigureRequest) 
 			config.CaPath = tryCaPath
 		}
 	}
+
 	if config.HashPath != "" {
+		err := os.MkdirAll(filepath.Dir(config.HashPath), os.ModePerm)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create directory for hash_path: %v", err)
+		}
 		if _, err := os.Stat(config.HashPath); os.IsNotExist(err) {
+
 			return nil, errors.New(fmt.Sprintf("hash_path '%s' does not exist", config.HashPath))
 		}
 	} else {
