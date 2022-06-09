@@ -10,7 +10,6 @@ import (
 	metricsv1 "github.com/spiffe/spire-plugin-sdk/proto/spire/hostservice/common/metrics/v1"
 	"github.com/spiffe/spire/pkg/agent/plugin/keymanager"
 	"github.com/spiffe/spire/pkg/agent/plugin/nodeattestor"
-	"github.com/spiffe/spire/pkg/agent/plugin/nodeattestor/jointoken"
 	"github.com/spiffe/spire/pkg/agent/plugin/svidstore"
 	"github.com/spiffe/spire/pkg/agent/plugin/workloadattestor"
 	"github.com/spiffe/spire/pkg/common/catalog"
@@ -78,11 +77,6 @@ func (repo *Repository) Close() {
 
 func Load(ctx context.Context, config Config) (_ *Repository, err error) {
 	// DEPRECATE: make this an error in SPIRE 1.5
-	if c, ok := config.PluginConfig[nodeAttestorType][jointoken.PluginName]; ok && c.IsEnabled() && c.IsExternal() {
-		config.Log.Warn("The built-in join_token node attestor cannot be overridden by an external plugin. The external plugin will be ignored; this will be a configuration error in a future release.")
-		config.PluginConfig[nodeAttestorType][jointoken.PluginName] = catalog.HCLPluginConfig{}
-	}
-
 	pluginConfigs, err := catalog.PluginConfigsFromHCL(config.PluginConfig)
 	if err != nil {
 		return nil, err

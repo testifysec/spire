@@ -1,18 +1,13 @@
 package catalog
 
 import (
-	"github.com/spiffe/spire/pkg/server/plugin/nodeattestor/tpm"
 	"github.com/spiffe/spire/pkg/common/catalog"
 	"github.com/spiffe/spire/pkg/server/plugin/nodeattestor"
 	"github.com/spiffe/spire/pkg/server/plugin/nodeattestor/aws"
 	"github.com/spiffe/spire/pkg/server/plugin/nodeattestor/azure"
 	"github.com/spiffe/spire/pkg/server/plugin/nodeattestor/gcp"
-	"github.com/spiffe/spire/pkg/server/plugin/nodeattestor/jointoken"
-	"github.com/spiffe/spire/pkg/server/plugin/nodeattestor/k8s/psat"
 	"github.com/spiffe/spire/pkg/server/plugin/nodeattestor/k8s/sat"
-	"github.com/spiffe/spire/pkg/server/plugin/nodeattestor/sshpop"
-	"github.com/spiffe/spire/pkg/server/plugin/nodeattestor/tpmdevid"
-	"github.com/spiffe/spire/pkg/server/plugin/nodeattestor/x509pop"
+	"github.com/spiffe/spire/pkg/server/plugin/nodeattestor/tpm"
 )
 
 type nodeAttestorRepository struct {
@@ -38,12 +33,7 @@ func (repo *nodeAttestorRepository) BuiltIns() []catalog.BuiltIn {
 		aws.BuiltIn(),
 		azure.BuiltIn(),
 		gcp.BuiltIn(),
-		jointoken.BuiltIn(),
-		psat.BuiltIn(),
 		sat.BuiltIn(),
-		sshpop.BuiltIn(),
-		tpmdevid.BuiltIn(),
-		x509pop.BuiltIn(),
 		tpm.BuiltIn(),
 	}
 }

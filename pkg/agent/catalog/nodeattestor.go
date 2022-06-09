@@ -5,13 +5,9 @@ import (
 	"github.com/spiffe/spire/pkg/agent/plugin/nodeattestor/aws"
 	"github.com/spiffe/spire/pkg/agent/plugin/nodeattestor/azure"
 	"github.com/spiffe/spire/pkg/agent/plugin/nodeattestor/gcp"
-	"github.com/spiffe/spire/pkg/agent/plugin/nodeattestor/jointoken"
 	"github.com/spiffe/spire/pkg/agent/plugin/nodeattestor/k8s/psat"
 	"github.com/spiffe/spire/pkg/agent/plugin/nodeattestor/k8s/sat"
-	"github.com/spiffe/spire/pkg/agent/plugin/nodeattestor/sshpop"
 	"github.com/spiffe/spire/pkg/agent/plugin/nodeattestor/tpm"
-	"github.com/spiffe/spire/pkg/agent/plugin/nodeattestor/tpmdevid"
-	"github.com/spiffe/spire/pkg/agent/plugin/nodeattestor/x509pop"
 	"github.com/spiffe/spire/pkg/common/catalog"
 )
 
@@ -38,12 +34,8 @@ func (repo *nodeAttestorRepository) BuiltIns() []catalog.BuiltIn {
 		aws.BuiltIn(),
 		azure.BuiltIn(),
 		gcp.BuiltIn(),
-		jointoken.BuiltIn(),
 		psat.BuiltIn(),
 		sat.BuiltIn(),
-		sshpop.BuiltIn(),
-		tpmdevid.BuiltIn(),
-		x509pop.BuiltIn(),
 		tpm.BuiltIn(),
 	}
 }
