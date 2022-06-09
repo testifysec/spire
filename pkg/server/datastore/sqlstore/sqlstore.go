@@ -41,8 +41,6 @@ const (
 	MySQL = "mysql"
 	// PostgreSQL database type
 	PostgreSQL = "postgres"
-	// SQLite database type
-	SQLite = "sqlite3"
 )
 
 // Configuration for the sql datastore implementation.
@@ -72,10 +70,6 @@ type sqlDB struct {
 	dialect     dialect
 	stmtCache   *stmtCache
 	supportsCTE bool
-
-	// this lock is only required for synchronized writes with "sqlite3". see
-	// the withTx() implementation for details.
-	opMu sync.Mutex
 }
 
 func (db *sqlDB) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
@@ -634,14 +628,6 @@ func (ds *Plugin) withTx(ctx context.Context, op func(tx *gorm.DB) error, readOn
 	db := ds.db
 	ds.mu.Unlock()
 
-	if db.databaseType == SQLite && !readOnly {
-		// sqlite3 can only have one writer at a time. since we're in WAL mode,
-		// there can be concurrent reads and writes, so no lock is necessary
-		// over the read operations.
-		db.opMu.Lock()
-		defer db.opMu.Unlock()
-	}
-
 	tx := db.BeginTx(ctx, nil)
 	if err := tx.Error; err != nil {
 		return sqlError.Wrap(err)
@@ -688,8 +674,6 @@ func (ds *Plugin) openDB(cfg *configuration, isReadOnly bool) (*gorm.DB, string,
 
 	ds.log.WithField(telemetry.DatabaseType, cfg.DatabaseType).Info("Opening SQL database")
 	switch cfg.DatabaseType {
-	case SQLite:
-		dialect = sqliteDB{log: ds.log}
 	case PostgreSQL:
 		dialect = postgresDB{}
 	case MySQL:
@@ -1203,8 +1187,6 @@ func listAttestedNodesOnce(ctx context.Context, db *sqlDB, req *datastore.ListAt
 
 func buildListAttestedNodesQuery(dbType string, supportsCTE bool, req *datastore.ListAttestedNodesRequest) (string, []interface{}, error) {
 	switch dbType {
-	case SQLite:
-		return buildListAttestedNodesQueryCTE(req, dbType)
 	case PostgreSQL:
 		// The PostgreSQL queries unconditionally leverage CTE since all versions
 		// of PostgreSQL supported by the plugin support CTE.
@@ -1854,10 +1836,6 @@ func fetchRegistrationEntry(ctx context.Context, db *sqlDB, entryID string) (*co
 
 func buildFetchRegistrationEntryQuery(dbType string, supportsCTE bool, entryID string) (string, []interface{}, error) {
 	switch dbType {
-	case SQLite:
-		// The SQLite3 queries unconditionally leverage CTE since the
-		// embedded version of SQLite3 supports CTE.
-		return buildFetchRegistrationEntryQuerySQLite3(entryID)
 	case PostgreSQL:
 		// The PostgreSQL queries unconditionally leverage CTE since all versions
 		// of PostgreSQL supported by the plugin support CTE.
@@ -2249,10 +2227,6 @@ func listRegistrationEntriesOnce(ctx context.Context, db queryContext, databaseT
 
 func buildListRegistrationEntriesQuery(dbType string, supportsCTE bool, req *datastore.ListRegistrationEntriesRequest) (string, []interface{}, error) {
 	switch dbType {
-	case SQLite:
-		// The SQLite3 queries unconditionally leverage CTE since the
-		// embedded version of SQLite3 supports CTE.
-		return buildListRegistrationEntriesQuerySQLite3(req)
 	case PostgreSQL:
 		// The PostgreSQL queries unconditionally leverage CTE since all versions
 		// of PostgreSQL supported by the plugin support CTE.
@@ -2265,85 +2239,6 @@ func buildListRegistrationEntriesQuery(dbType string, supportsCTE bool, req *dat
 	default:
 		return "", nil, sqlError.New("unsupported db type: %q", dbType)
 	}
-}
-
-func buildListRegistrationEntriesQuerySQLite3(req *datastore.ListRegistrationEntriesRequest) (string, []interface{}, error) {
-	builder := new(strings.Builder)
-
-	filtered, args, err := appendListRegistrationEntriesFilterQuery("\nWITH listing AS (\n", builder, SQLite, req)
-	if err != nil {
-		return "", nil, err
-	}
-	if filtered {
-		builder.WriteString(")")
-	}
-
-	builder.WriteString(`
-SELECT
-	id AS e_id,
-	entry_id,
-	spiffe_id,
-	parent_id,
-	ttl AS reg_ttl,
-	admin,
-	downstream,
-	expiry,
-	store_svid,
-	NULL AS selector_id,
-	NULL AS selector_type,
-	NULL AS selector_value,
-	NULL AS trust_domain,
-	NULL AS dns_name_id,
-	NULL AS dns_name,
-	revision_number
-FROM
-	registered_entries
-`)
-	if filtered {
-		builder.WriteString("WHERE id IN (SELECT e_id FROM listing)\n")
-	}
-	builder.WriteString(`
-UNION
-
-SELECT
-	F.registered_entry_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, B.trust_domain, NULL, NULL, NULL
-FROM
-	bundles B
-INNER JOIN
-	federated_registration_entries F
-ON
-	B.id = F.bundle_id
-`)
-	if filtered {
-		builder.WriteString("WHERE\n\tF.registered_entry_id IN (SELECT e_id FROM listing)\n")
-	}
-	builder.WriteString(`
-UNION
-
-SELECT
-	registered_entry_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, id, value, NULL
-FROM
-	dns_names
-`)
-	if filtered {
-		builder.WriteString("WHERE registered_entry_id IN (SELECT e_id FROM listing)\n")
-	}
-	builder.WriteString(`
-UNION
-
-SELECT
-	registered_entry_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, id, type, value, NULL, NULL, NULL, NULL
-FROM
-	selectors
-`)
-	if filtered {
-		builder.WriteString("WHERE registered_entry_id IN (SELECT e_id FROM listing)\n")
-	}
-	builder.WriteString(`
-ORDER BY e_id, selector_id, dns_name_id
-;`)
-
-	return builder.String(), args, nil
 }
 
 func buildListRegistrationEntriesQueryPostgreSQL(req *datastore.ListRegistrationEntriesRequest) (string, []interface{}, error) {
